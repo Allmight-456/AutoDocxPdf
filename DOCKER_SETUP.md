@@ -7,13 +7,14 @@
 1. [Overview](#overview)
 2. [Prerequisites](#prerequisites)
 3. [Quick Start](#quick-start)
-4. [Configuration](#configuration)
-5. [Running the Container](#running-the-container)
-6. [Volume Mounts Explained](#volume-mounts-explained)
-7. [Common Use Cases](#common-use-cases)
-8. [Testing on Different Projects](#testing-on-different-projects)
-9. [Troubleshooting](#troubleshooting)
-10. [Platform-Specific Notes](#platform-specific-notes)
+4. [Important: Folder Permissions (First Run)](#important-folder-permissions-first-run)
+5. [Configuration](#configuration)
+6. [Running the Container](#running-the-container)
+7. [Volume Mounts Explained](#volume-mounts-explained)
+8. [Common Use Cases](#common-use-cases)
+9. [Testing on Different Projects](#testing-on-different-projects)
+10. [Troubleshooting](#troubleshooting)
+11. [Platform-Specific Notes](#platform-specific-notes)
 
 ---
 
@@ -97,7 +98,15 @@ environment:
   - PROJECT_DESCRIPTION=A brief description of what this project does
 ```
 
-### 3. Build the Docker Image
+### 3. Create Required Folders (IMPORTANT - First Time Only)
+```bash
+# Create folders to avoid permission issues
+mkdir -p output screenshots mermaid_diagrams
+
+# See "Important: Folder Permissions (First Run)" section for details
+```
+
+### 4. Build the Docker Image
 ```bash
 # Build the image (first time only, takes 2-5 minutes)
 docker-compose build
@@ -106,7 +115,7 @@ docker-compose build
 docker-compose build --no-cache
 ```
 
-### 4. Run the Container
+### 5. Run the Container
 ```bash
 # Run the documentation generator
 docker-compose up
@@ -118,7 +127,7 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
-### 5. Find Your Documentation
+### 6. Find Your Documentation
 After the container finishes (usually 2-10 minutes depending on project size):
 
 ```bash
@@ -128,6 +137,101 @@ After the container finishes (usually 2-10 minutes depending on project size):
 # Screenshots will be in:
 ./screenshots/
 ```
+
+---
+
+## Important: Folder Permissions (First Run)
+
+### The Ownership Issue
+
+When you run the Docker container for the **first time**, it creates three folders on your host machine:
+- `output/` - For generated documentation
+- `screenshots/` - For captured screenshots
+- `mermaid_diagrams/` - For architecture diagrams
+
+**Problem:** These folders are created by the container's root user, which may cause permission issues when the container tries to write files into them.
+
+**Symptoms:**
+- Container fails to save documentation files
+- Permission denied errors in logs
+- Empty output folder after container completes
+
+### Solution 1: Pre-Create Folders (Recommended)
+
+Create the folders **before** running the container for the first time:
+
+```bash
+# Navigate to the documentation_generator directory
+cd /path/to/documentation_generator
+
+# Create the three required folders
+mkdir -p output screenshots mermaid_diagrams
+
+# Verify folders are created
+ls -la
+```
+
+This ensures the folders are owned by your user account, not root.
+
+### Solution 2: Fix Ownership After First Run
+
+If you've already run the container and encountered permission issues:
+
+```bash
+# Check current ownership (you'll likely see 'root' or a UID)
+ls -la output/ screenshots/ mermaid_diagrams/
+
+# Change ownership to your user
+# $USER automatically uses your current username
+sudo chown -R $USER:$USER output/ screenshots/ mermaid_diagrams/
+
+# Verify ownership is now correct
+ls -la output/ screenshots/ mermaid_diagrams/
+# Should show your username instead of 'root'
+```
+
+**Note:** The `$USER` variable automatically expands to your current username (could be "user", "john", etc.).
+
+### Verify Folder Permissions
+
+Check if folders are properly owned by your user:
+
+```bash
+# List detailed information about folders
+ls -la | grep -E "output|screenshots|mermaid_diagrams"
+
+# Expected output (your username should appear, not 'root'):
+# drwxrwxr-x  2 youruser youruser  4096 Oct 27 10:00 output
+# drwxrwxr-x  2 youruser youruser  4096 Oct 27 10:00 screenshots
+# drwxrwxr-x  2 youruser youruser  4096 Oct 27 10:00 mermaid_diagrams
+
+# Check if you can write to folders
+touch output/test.txt && rm output/test.txt && echo "Permissions OK!"
+```
+
+### Alternative: Manual Ownership Fix for Specific User
+
+If you need to assign ownership to a specific user (not current user):
+
+```bash
+# Replace 'username' with actual username
+sudo chown -R username:username output/ screenshots/ mermaid_diagrams/
+
+# Example:
+sudo chown -R john:john output/ screenshots/ mermaid_diagrams/
+```
+
+### When to Apply This Fix
+
+**Apply before first run (Solution 1):**
+- If you're setting up the documentation generator for the first time
+- If you want to avoid permission issues entirely
+- Recommended approach for new users
+
+**Apply after encountering issues (Solution 2):**
+- If container logs show "Permission denied" errors
+- If output folder is empty after container completes
+- If you forgot to pre-create folders
 
 ---
 
@@ -546,6 +650,23 @@ docker-compose logs
 # - Gemini API quota exceeded
 ```
 
+### Problem: "Permission denied" writing to output/screenshots folders
+**Solution:** Fix folder ownership
+```bash
+# This happens when folders are created by container's root user
+# See "Important: Folder Permissions (First Run)" section above for detailed solutions
+
+# Quick fix - change ownership to your user
+sudo chown -R $USER:$USER output/ screenshots/ mermaid_diagrams/
+
+# Verify fix worked
+ls -la output/ screenshots/ mermaid_diagrams/
+# Should show your username, not 'root'
+
+# For future runs: pre-create folders before first run
+mkdir -p output screenshots mermaid_diagrams
+```
+
 ### Problem: "Cannot access host machine's localhost"
 **Solution:** Use `host.docker.internal` instead of `localhost`
 ```yaml
@@ -714,3 +835,4 @@ If you encounter issues:
 ---
 
 **Happy Documenting!** 🚀📄
+BY ISHAN KUMAR

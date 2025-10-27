@@ -1,6 +1,6 @@
 # ==========================================
 # Documentation Generator - Docker Image
-# Version: 1.2.2
+# Version: 1.2.6
 # ==========================================
 # Multi-stage build for optimized image size
 # Base: Python 3.13 with Chromium for screenshots
@@ -10,9 +10,9 @@ FROM python:3.13-slim
 # Metadata
 LABEL maintainer="Documentation Generator"
 LABEL description="Autonomous AI documentation generator - no interaction required"
-LABEL version="1.2.2"
-LABEL release-date="2025-10-15"
-LABEL features="Autonomous operation, URL health checks, Smart repomix resolution, Rate limiting"
+LABEL version="1.2.6"
+LABEL release-date="2025-10-24"
+LABEL features="Chrome binary fix, Code block reduction, URL validation, Live screenshot support"
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
