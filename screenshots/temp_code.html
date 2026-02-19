@@ -1,0 +1,89 @@
+
+        <html>
+        <head>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+            <style>
+                body { 
+                    margin: 20px; 
+                    background: #0d1117; 
+                    font-family: 'Consolas', 'Monaco', monospace;
+                }
+                pre { 
+                    margin: 0; 
+                    border-radius: 6px;
+                    padding: 16px;
+                }
+                code { 
+                    font-family: 'Consolas', 'Monaco', monospace; 
+                    font-size: 13px;
+                    line-height: 1.5;
+                }
+                .file-header {
+                    color: #c9d1d9;
+                    font-size: 14px;
+                    margin-bottom: 10px;
+                    padding: 8px;
+                    background: #161b22;
+                    border-radius: 6px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="file-header">📄 app/api/auth.py</div>
+            <pre><code class="language-python">"""
+Authentication API routes for JWT token generation.
+Implements POST /auth/token endpoint as per Flow 1 specifications.
+"""
+from fastapi import APIRouter, HTTPException, status, Header
+from typing import Optional
+from app.schemas.auth import AuthTokenRequest, AuthTokenResponse, AuthErrorResponse
+from app.services.auth import AuthService, auth_service
+
+router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+@router.post(
+    "/token",
+    response_model=AuthTokenResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        400: {
+            "model": AuthErrorResponse,
+            "description": "Bad Request - Invalid parameters"
+        },
+        401: {
+            "model": AuthErrorResponse,
+            "description": "Unauthorized - Invalid secret key"
+        }
+    },
+    summary="Generate JWT Token with Secret Key Authentication",
+    description="""
+    Generate a JWT token for authenticated API access with dual-layer security.
+    
+    **Flow 1: Authentication & Token Generation (Hybrid Security)**
+    
+    This endpoint requires:
+    1. Valid user credentials (userId, role, zone)
+    2. Authentication secret key for additional security
+    
+    **Security Model:**
+    - **Layer 1**: Secret key validation via Authorization header ("Secret <key>")
+    - **Layer 2**: JWT token signing using server-side secret (HS256)
+    
+    The returned JWT token contains:
+    - User identity (userId, role, zone)
+    - Role-based permissions (read/write access)
+    - Token expiration (24 hours)
+    
+    **Authorization Header Format:**
+    ```
+    Authorization: Secret arise-master-auth-secret-2025
+    ```
+    
+
+... (truncated, 140 more lines)</code></pre>
+            <script>hljs.highlightAll();</script>
+        </body>
+        </html>
+        

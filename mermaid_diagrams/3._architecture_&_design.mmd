@@ -1,0 +1,7 @@
+flowchart TD
+    A[Client] --> B[API Gateway]
+    B --> C[Auth Service]
+    B --> D[Plot Service]
+    B --> E[User Service]
+    D --> F[Database]
+    E --> F
